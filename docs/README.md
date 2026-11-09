@@ -1,11 +1,12 @@
 # ドキュメントの編集
 
 Astro Starlight による日本語・英語ドキュメントです。Node.js 24.22.2 以上を使用します。
+ソースと公開用CIは `docs` ブランチで管理し、アプリケーションの `main` ブランチには含めません。
 依存関係はアプリケーションから独立して管理します。
 
 ## ローカル起動
 
-リポジトリのルートから実行します。
+`docs` ブランチのリポジトリルートから実行します。
 
 ```sh
 cd docs
@@ -47,15 +48,34 @@ npm run preview
 
 静的ファイルは `dist/` に出力されます。
 
-テスト項目一覧を変更した場合は、リポジトリのルートから `node scripts/check-test-inventory.mjs` を実行します。Git管理下のテストメソッドと日英の一覧を照合し、ファイル・キー・件数の抜けや重複、日本語説明の空欄を検出します。ドキュメントのCIでも実行します。テストを追加・改名・削除した場合は、一覧も併せて更新してください。
+### アプリケーションとテスト一覧の対応
+
+`docs/application-ref` に、一覧の照合対象となるアプリケーションのコミットSHA（40桁）を記録します。
+CIはそのコミットの `tests/` を `application/` に取得し、日英の一覧と照合します。
+アプリ側でテストを追加・改名・削除した場合は、このブランチでSHAと一覧を併せて更新してください。
+
+ローカルではリポジトリのルートから、例えば次のように確認します。
+
+```sh
+git clone --no-checkout --single-branch --branch main https://github.com/catatsumuri/laravel-react-secure-starter-kit.git application
+git -C application checkout --detach "$(cat docs/application-ref)"
+node scripts/check-test-inventory.mjs application
+```
+
+`application/` はGit管理対象外です。既存のアプリケーションのチェックアウトを引数に指定することもできます。
+一覧の照合はドキュメント専用CIで実行し、利用者のアプリCIからは実行しません。
 
 ## GitHub Pages
 
 GitHub リポジトリの **Settings → Pages → Build and deployment → Source** を
 **GitHub Actions** に設定してください。
 
-`main` へのドキュメント変更の push で `.github/workflows/docs.yml` がビルド・デプロイします。
-Pull Request ではビルドのみ実行します。Actions から手動実行もできます。
+`docs` ブランチへのドキュメント変更の push で `.github/workflows/docs.yml` がビルド・デプロイします。
+`docs` ブランチ宛てのPull Requestでは照合とビルドのみ実行します。
+公開用ジョブは元リポジトリでのみ動作します。
+公開は `docs` ブランチへのpushで行います。
+Pagesの `github-pages` environmentにブランチ制限がある場合は、`docs` のデプロイを許可してください。
+`docs` は独立して管理し、アプリケーションの `main` にはマージしません。
 
 公開先（英語・デフォルト）: <https://catatsumuri.github.io/laravel-react-secure-starter-kit/>
 

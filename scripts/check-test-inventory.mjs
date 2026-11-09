@@ -1,20 +1,28 @@
 import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
+import { resolve } from 'node:path';
 
-const root = fileURLToPath(new URL('../', import.meta.url));
+if (!process.argv[2]) {
+    console.error('Usage: node scripts/check-test-inventory.mjs <application-checkout>');
+    process.exit(1);
+}
+const applicationRoot = resolve(process.argv[2]);
 // Use the Git index so staged new tests are included, while local scratch tests are not.
 const paths = execFileSync('git', ['ls-files', '-z', '--', 'tests'], {
-    cwd: root,
+    cwd: applicationRoot,
     encoding: 'utf8',
 })
     .split('\0')
     .filter((path) => path.endsWith('.php'));
+if (!paths.length) {
+    console.error('No tracked PHP tests found in the application checkout.');
+    process.exit(1);
+}
 const source = new Map();
 for (const path of paths) {
     const methods = [
         ...readFileSync(
-            new URL(`../${path}`, import.meta.url),
+            resolve(applicationRoot, path),
             'utf8',
         ).matchAll(/public\s+function\s+(test_\w+)\s*\(/g),
     ].map((match) => match[1]);

@@ -9,7 +9,7 @@ This inventory covers **240 test methods in 25 committed files** (238 Feature me
 
 Counts refer to methods. Data providers run some methods with multiple inputs, so the executed case count can differ. This inventory describes implemented checks; it does not report the latest test results or guarantee behavior in every configuration.
 
-For commands, see [Tests and static analysis](../#tests-and-static-analysis). CI compares this inventory and its Japanese counterpart with the Git-tracked test methods using `node scripts/check-test-inventory.mjs`.
+For commands, see [Tests and static analysis](../#tests-and-static-analysis). CI compares this inventory and its Japanese counterpart with the test methods at the application commit recorded in `docs/application-ref` using `node scripts/check-test-inventory.mjs application` on the `docs` branch.
 
 ## Feature/Auth/AuthenticationTest
 

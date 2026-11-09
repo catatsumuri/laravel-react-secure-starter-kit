@@ -11,7 +11,7 @@ description: コミット済みの240テストメソッドと日本語の確認�
 
 実行方法は[テストと静的解析](../#テストと静的解析)を参照してください。
 
-CIでは `node scripts/check-test-inventory.mjs` により、Git管理下のテストメソッドと日英の一覧を照合します。
+CIでは `docs` ブランチの `node scripts/check-test-inventory.mjs application` により、`docs/application-ref` で指定したコミットのテストメソッドと日英の一覧を照合します。
 
 ## ログイン・ログアウト
 

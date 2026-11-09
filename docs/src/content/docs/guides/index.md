@@ -123,7 +123,6 @@ This is the CI entry point. It runs frontend code checks and TypeScript checks, 
 | `composer test` | Clear cached configuration, check PHP formatting and types, and run tests |
 | `php artisan test --filter=NotificationTest` | Run tests matching the specified name |
 | `npm run build` | Production frontend build |
-| `node scripts/check-test-inventory.mjs` | Compare tracked test methods with both documentation inventories |
 
 Use `composer lint` or `npm run check:fix` to apply fixes. These commands modify files, so inspect the diff afterward.
 

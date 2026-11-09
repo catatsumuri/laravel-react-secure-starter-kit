@@ -2,19 +2,17 @@ name: Deploy documentation
 
 on:
   push:
-    branches: [main]
+    branches: [docs]
     paths:
       - 'docs/**'
-      - 'tests/**'
       - 'scripts/check-test-inventory.mjs'
       - '.github/workflows/docs.yml'
   pull_request:
+    branches: [docs]
     paths:
       - 'docs/**'
-      - 'tests/**'
       - 'scripts/check-test-inventory.mjs'
       - '.github/workflows/docs.yml'
-  workflow_dispatch:
 
 permissions:
   contents: read
@@ -25,6 +23,7 @@ concurrency:
 
 jobs:
   build:
+    if: github.repository == 'catatsumuri/laravel-react-secure-starter-kit'
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -33,6 +32,24 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      - name: Read application revision
+        id: application
+        working-directory: .
+        run: |
+          ref="$(cat docs/application-ref)"
+          if [[ ! "$ref" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "docs/application-ref must contain a full commit SHA" >&2
+            exit 1
+          fi
+          echo "ref=$ref" >> "$GITHUB_OUTPUT"
+      - name: Checkout application for inventory checks
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: catatsumuri/laravel-react-secure-starter-kit
+          ref: ${{ steps.application.outputs.ref }}
+          path: application
+          persist-credentials: false
+          sparse-checkout: tests
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '24.22.2'
@@ -40,7 +57,7 @@ jobs:
           cache-dependency-path: docs/package-lock.json
       - run: npm ci
       - name: Check test inventory
-        run: node ../scripts/check-test-inventory.mjs
+        run: node ../scripts/check-test-inventory.mjs ../application
       - run: npm run build
       - uses: actions/upload-pages-artifact@v4
         if: github.event_name != 'pull_request'
@@ -48,7 +65,7 @@ jobs:
           path: docs/dist
 
   deploy:
-    if: github.event_name != 'pull_request'
+    if: github.repository == 'catatsumuri/laravel-react-secure-starter-kit' && github.event_name != 'pull_request' && github.ref == 'refs/heads/docs'
     needs: build
     runs-on: ubuntu-latest
     permissions:
